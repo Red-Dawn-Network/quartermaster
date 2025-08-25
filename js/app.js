@@ -1,6 +1,5 @@
-// Red Dawn Quartermaster — basic multi‑server support (no persistence yet)
-// Adds a server toolbar (select/rename/add) and colors to differentiate servers.
-// Works with the existing index.html markup — JS injects the toolbar.
+// Red Dawn Quartermaster — multi-server support + persistence (localStorage)
+// Persists servers[], all mods, and the active server index. No theme code.
 
 // =============================
 // State
@@ -23,11 +22,60 @@ function makeServer(name){
   return { id: uid(), name, color, mods: [] };
 }
 
-// Bootstrap at least one server
-if (!servers.length) servers.push(makeServer('Server 1'));
+// =============================
+// Persistence
+// =============================
+const STORAGE_KEY = 'rdqm-state-v1'; // { servers: [...], active: 0 }
+
+function saveState(){
+  try {
+    const data = { servers, active };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Save failed:', e);
+  }
+}
+
+function loadState(){
+  let ok = false;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw){
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.servers)){
+        // Replace servers contents in-place so references stay valid
+        servers.splice(0, servers.length, ...parsed.servers.map(normalizeServer));
+        active = Number.isInteger(parsed.active) ? parsed.active : 0;
+        active = Math.min(Math.max(0, active), Math.max(servers.length - 1, 0));
+        ok = true;
+      }
+    }
+  } catch (e) {
+    console.warn('Load failed, using defaults:', e);
+  }
+  if (!ok) {
+    if (!servers.length) servers.push(makeServer('Server 1'));
+    active = 0;
+    saveState();
+  }
+}
+
+function normalizeServer(s){
+  return {
+    id: s?.id ?? uid(),
+    name: String(s?.name ?? 'Server'),
+    color: String(s?.color ?? palette[0]),
+    mods: Array.isArray(s?.mods) ? s.mods.map(m => ({
+      name: String(m?.name ?? ''),
+      id: String(m?.id ?? ''),
+      sizeValue: (m?.sizeValue ?? null) === null ? null : Number(m.sizeValue),
+      sizeUnit: String(m?.sizeUnit ?? ''),
+    })) : []
+  };
+}
 
 // =============================
-// DOM refs — existing elements from prior skeleton
+// DOM refs — existing elements
 // =============================
 const form = document.getElementById('mod-form');
 const nameEl = document.getElementById('name');
@@ -97,6 +145,7 @@ function mountServerBar(){
       active = +e.target.value;
       refreshServerBar();
       render();
+      saveState();
     });
 
     bar.querySelector('#btn-add-server').addEventListener('click', ()=>{
@@ -106,6 +155,7 @@ function mountServerBar(){
       active = servers.length - 1;
       refreshServerBar();
       render();
+      saveState();
     });
 
     bar.querySelector('#btn-rename-server').addEventListener('click', ()=>{
@@ -115,6 +165,7 @@ function mountServerBar(){
       cur.name = n.trim();
       refreshServerBar();
       render();
+      saveState();
     });
 
     bar.querySelector('#server-color').addEventListener('click', ()=>{
@@ -122,6 +173,7 @@ function mountServerBar(){
       const i = (palette.indexOf(cur.color)+1) % palette.length;
       cur.color = palette[i];
       refreshServerBar();
+      saveState();
     });
   }
   refreshServerBar();
@@ -146,6 +198,9 @@ function refreshServerBar(){
     const s = servers[active];
     h2.innerHTML = `Mods <span class="server-chip"><span class="server-badge" style="background:${s.color}"></span>${esc(s.name)}</span>`;
   }
+
+  // Update confirm title to include server name
+  confirmTitle.textContent = `Delete all mods in "${servers[active].name}"?`;
 }
 
 // =============================
@@ -170,7 +225,6 @@ function render(){
   });
   tbody.replaceChildren(frag);
 
-  // Update clear-all modal title to include server name
   confirmTitle.textContent = `Delete all mods in "${servers[active].name}"?`;
 }
 
@@ -194,6 +248,7 @@ form.addEventListener('submit', (e) => {
   servers[active].mods.push({ name, id, sizeValue, sizeUnit: sizeValue !== null ? sizeUnit : '' });
   form.reset();
   render();
+  saveState();
 });
 
 // =============================
@@ -208,6 +263,7 @@ tbody.addEventListener('click', (e) => {
     const idx = +btn.dataset.delete;
     list.splice(idx, 1);
     render();
+    saveState();
     return;
   }
   if (btn.dataset.edit !== undefined){
@@ -233,6 +289,7 @@ clearAllBtn.addEventListener('click', () => {
 confirmDeleteBtn.addEventListener('click', () => {
   servers[active].mods.splice(0, servers[active].mods.length);
   render();
+  saveState();
   closeModal(confirmModal);
 });
 
@@ -267,6 +324,7 @@ editForm.addEventListener('submit', (e) => {
   list[idx] = { name, id, sizeValue, sizeUnit: sizeValue !== null ? sizeUnit : '' };
   closeModal(modal);
   render();
+  saveState();
 });
 
 function openModal(m, onOpen){
@@ -282,8 +340,24 @@ function closeModal(m){
 }
 
 // Utilities
-function esc(s){ return (s ?? '').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+function esc(s){
+  return (s ?? '').toString().replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"
+  }[c]));
+}
 
-// Mount + initial render
+// =============================
+// Boot
+// =============================
+loadState();        // load from localStorage (or create defaults)
 mountServerBar();
 render();
+
+// Optional: cross-tab sync — keep two tabs in sync
+window.addEventListener('storage', (e) => {
+  if (e.key === STORAGE_KEY) {
+    loadState();
+    refreshServerBar();
+    render();
+  }
+});
