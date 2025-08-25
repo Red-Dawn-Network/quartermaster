@@ -6,22 +6,11 @@
 // =============================
 const AUTH_KEY = 'rdqm-admin-auth';
 (function(){
-  const expected = window.RDQM_CONFIG?.adminPassword || 'admin';
   let authed = false;
   try { authed = localStorage.getItem(AUTH_KEY) === '1'; } catch (e) {}
   if (!authed){
-    while (true){
-      const input = prompt('Enter admin password:');
-      if (input === null){
-        window.location.href = 'index.html';
-        throw new Error('Auth cancelled');
-      }
-      if (input === expected){
-        try { localStorage.setItem(AUTH_KEY, '1'); } catch (e) {}
-        break;
-      }
-      alert('Incorrect password');
-    }
+    window.location.href = 'index.html';
+    throw new Error('Auth required');
   }
 })();
 

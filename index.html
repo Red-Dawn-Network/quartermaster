@@ -11,7 +11,7 @@
   <header>
     <nav class="nav-links">
       <a href="index.html" aria-current="page">Viewer</a>
-      <a href="admin.html">Admin</a>
+      <a href="admin.html" id="admin-link">Admin</a>
     </nav>
     <h1 id="app-title">Mods</h1>
   </header>
@@ -45,6 +45,26 @@
     <p>&copy; 2025 Red Dawn Network — MIT Licensed</p>
     <p>This project is not associated with or endorsed by Bohemia Interactive.</p>
   </footer>
+    <div id="auth-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+      <header class="modal__header">
+        <h3 id="auth-title">Admin Login</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <form id="auth-form" class="modal__body" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label>
+          <span>Password</span>
+          <input id="auth-password" type="password" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        </label>
+        <p class="hint" id="auth-error"></p>
+        <div class="row">
+          <button type="submit" class="btn">Login</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <script src="config.js"></script>
   <script src="js/viewer.js"></script>
 </body>
