@@ -1,5 +1,6 @@
 (function(){
   const STORAGE_KEY = 'rdqm-state-v1';
+  let state;
 
   function esc(s){
     return (s ?? '').toString().replace(/[&<>"']/g, c => ({
@@ -24,13 +25,29 @@
     }
   }
 
+    function saveState(){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e){ console.warn('Failed to save state', e); }
+  }
+
+  function refreshServerSelect(){
+    const select = document.getElementById('server-select');
+    const colorDot = document.getElementById('server-color');
+    if (select){
+      select.innerHTML = state.servers.map((s,i)=>`<option value="${i}">${esc(s.name)}</option>`).join('');
+      select.value = String(state.active);
+    }
+    if (colorDot){
+      colorDot.style.background = state.servers[state.active]?.color || '#ccc';
+    }
+  }
+
   function render(){
     const title = window.RDQM_CONFIG?.title || 'Mods';
     document.title = title;
     document.getElementById('app-title').textContent = title;
 
-    const { servers, active } = loadState();
-    const server = servers[active] || { name: 'Server', mods: [] };
+    const server = state.servers[state.active] || { name: 'Server', mods: [] };
     document.getElementById('server-name').textContent = server.name;
 
     const tbody = document.getElementById('mods-tbody');
@@ -41,6 +58,15 @@
       tbody.appendChild(tr);
     });
   }
+
+    state = loadState();
+  refreshServerSelect();
+  document.getElementById('server-select')?.addEventListener('change', (e) => {
+    state.active = +e.target.value;
+    saveState();
+    refreshServerSelect();
+    render();
+  });
 
   render();
 })();

@@ -2,6 +2,30 @@
 // Persists servers[], all mods, the active server index, and theme preference.
 
 // =============================
+// Simple admin authentication
+// =============================
+const AUTH_KEY = 'rdqm-admin-auth';
+(function(){
+  const expected = window.RDQM_CONFIG?.adminPassword || 'admin';
+  let authed = false;
+  try { authed = localStorage.getItem(AUTH_KEY) === '1'; } catch (e) {}
+  if (!authed){
+    while (true){
+      const input = prompt('Enter admin password:');
+      if (input === null){
+        window.location.href = 'index.html';
+        throw new Error('Auth cancelled');
+      }
+      if (input === expected){
+        try { localStorage.setItem(AUTH_KEY, '1'); } catch (e) {}
+        break;
+      }
+      alert('Incorrect password');
+    }
+  }
+})();
+
+// =============================
 // State
 // =============================
 const palette = [
@@ -99,6 +123,13 @@ const includeIdEl = document.getElementById('include-id');
 const listModal = document.getElementById('mod-list-modal');
 const listTextEl = document.getElementById('mod-list-text');
 const copyListBtn = document.getElementById('copy-mod-list-text');
+const logoutLink = document.getElementById('logout-link');
+
+logoutLink?.addEventListener('click', (e) => {
+  e.preventDefault();
+  try { localStorage.removeItem(AUTH_KEY); } catch (err) {}
+  window.location.href = 'index.html';
+});
 
 // =============================
 // Theme (dark/light)
