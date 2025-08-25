@@ -170,14 +170,27 @@ const confirmModal = document.getElementById('confirm-modal');
 const confirmTitle = document.getElementById('confirm-title');
 const confirmDeleteBtn = document.getElementById('confirm-delete-all');
 
+// Server modals
+const addServerModal = document.getElementById('add-server-modal');
+const addServerForm = document.getElementById('add-server-form');
+const addServerNameEl = document.getElementById('add-server-name');
+
+const renameServerModal = document.getElementById('rename-server-modal');
+const renameServerForm = document.getElementById('rename-server-form');
+const renameServerNameEl = document.getElementById('rename-server-name');
+
+const deleteServerModal = document.getElementById('delete-server-modal');
+const deleteServerHint = document.getElementById('delete-server-hint');
+const confirmDeleteServerBtn = document.getElementById('confirm-delete-server');
+
 // Aggressively disable autofill/autocorrect/suggestions
-[form, editForm].forEach(f => {
+[form, editForm, addServerForm, renameServerForm].forEach(f => {
   f.setAttribute('autocomplete','off');
   f.setAttribute('autocapitalize','off');
   f.setAttribute('autocorrect','off');
   f.setAttribute('spellcheck','false');
 });
-[nameEl, idEl, sizeValueEl, sizeUnitEl, editNameEl, editIdEl, editSizeValueEl, editSizeUnitEl].forEach(inp => {
+[nameEl, idEl, sizeValueEl, sizeUnitEl, editNameEl, editIdEl, editSizeValueEl, editSizeUnitEl, addServerNameEl, renameServerNameEl].forEach(inp => {
   inp.setAttribute('autocomplete','off');
   inp.setAttribute('autocapitalize','off');
   inp.setAttribute('autocorrect','off');
@@ -225,23 +238,20 @@ function mountServerBar(){
     });
 
     bar.querySelector('#btn-add-server').addEventListener('click', ()=>{
-      const n = prompt('New server name:', `Server ${servers.length+1}`);
-      if (!n) return;
-      servers.push(makeServer(n.trim()));
-      active = servers.length - 1;
-      refreshServerBar();
-      render();
-      saveState();
+      addServerNameEl.value = `Server ${servers.length+1}`;
+      openModal(addServerModal, () => addServerNameEl.focus({ preventScroll: true }));
     });
 
     bar.querySelector('#btn-rename-server').addEventListener('click', ()=>{
       const cur = servers[active];
-      const n = prompt('Rename server:', cur.name);
-      if (!n) return;
-      cur.name = n.trim();
-      refreshServerBar();
-      render();
-      saveState();
+      renameServerNameEl.value = cur.name;
+      openModal(renameServerModal, () => renameServerNameEl.focus({ preventScroll: true }));
+    });
+
+    bar.querySelector('#btn-delete-server').addEventListener('click', ()=>{
+      const cur = servers[active];
+      deleteServerHint.textContent = `Delete server "${cur.name}"? This cannot be undone.`;
+      openModal(deleteServerModal);
     });
 
     bar.querySelector('#btn-delete-server').addEventListener('click', ()=>{
@@ -292,6 +302,8 @@ function refreshServerBar(){
 
   // Update confirm title to include server name
   confirmTitle.textContent = `Delete all mods in "${servers[active].name}"?`;
+  const delBtn = bar.querySelector('#btn-delete-server');
+  if (delBtn) delBtn.disabled = servers.length === 1;
 }
 
 // =============================
@@ -415,13 +427,15 @@ confirmDeleteBtn.addEventListener('click', () => {
 // =============================
 // Modal helpers
 // =============================
-modal.addEventListener('click', (e) => { if (e.target?.dataset?.close !== undefined) closeModal(modal); });
-confirmModal.addEventListener('click', (e) => { if (e.target?.dataset?.close !== undefined) closeModal(confirmModal); });
+[modal, confirmModal, addServerModal, renameServerModal, deleteServerModal].forEach(m => {
+  m.addEventListener('click', (e) => { if (e.target?.dataset?.close !== undefined) closeModal(m); });
+});
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape'){
-    if (!modal.classList.contains('hidden')) closeModal(modal);
-    if (!confirmModal.classList.contains('hidden')) closeModal(confirmModal);
+    [modal, confirmModal, addServerModal, renameServerModal, deleteServerModal].forEach(m => {
+      if (!m.classList.contains('hidden')) closeModal(m);
+    });
   }
 });
 
@@ -449,6 +463,39 @@ editForm.addEventListener('submit', (e) => {
   saveState();
 });
 
+addServerForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = addServerNameEl.value.trim();
+  if (!name) return;
+  servers.push(makeServer(name));
+  active = servers.length - 1;
+  refreshServerBar();
+  render();
+  saveState();
+  closeModal(addServerModal);
+});
+
+renameServerForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = renameServerNameEl.value.trim();
+  if (!name) return;
+  servers[active].name = name;
+  refreshServerBar();
+  render();
+  saveState();
+  closeModal(renameServerModal);
+});
+
+confirmDeleteServerBtn.addEventListener('click', () => {
+  servers.splice(active, 1);
+  if (!servers.length) servers.push(makeServer('Server 1'));
+  active = Math.min(active, servers.length - 1);
+  refreshServerBar();
+  render();
+  saveState();
+  closeModal(deleteServerModal);
+});
+
 function openModal(m, onOpen){
   m.classList.remove('hidden');
   m.setAttribute('aria-hidden','false');
@@ -458,7 +505,7 @@ function closeModal(m){
   m.classList.add('hidden');
   m.setAttribute('aria-hidden','true');
   const form = m.querySelector('form');
-  if (form && m === modal) form.reset();
+  if (form) form.reset();
 }
 
 // Utilities

@@ -126,6 +126,66 @@
     </div>
   </div>
 
+  <!-- Add Server Modal -->
+  <div id="add-server-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="add-server-title">
+      <header class="modal__header">
+        <h3 id="add-server-title">Add Server</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <form id="add-server-form" class="modal__body" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label>
+          <span>Name</span>
+          <input id="add-server-name" type="text" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        </label>
+        <div class="row">
+          <button type="submit" class="btn">Add</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Rename Server Modal -->
+  <div id="rename-server-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="rename-server-title">
+      <header class="modal__header">
+        <h3 id="rename-server-title">Rename Server</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <form id="rename-server-form" class="modal__body" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label>
+          <span>Name</span>
+          <input id="rename-server-name" type="text" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        </label>
+        <div class="row">
+          <button type="submit" class="btn">Save</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Server Modal -->
+  <div id="delete-server-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="delete-server-title">
+      <header class="modal__header">
+        <h3 id="delete-server-title">Delete server?</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <div class="modal__body">
+        <p class="hint" id="delete-server-hint"></p>
+        <div class="row modal__actions">
+          <button type="button" id="confirm-delete-server" class="btn btn-danger">Delete</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Confirm Clear Modal -->
   <div id="confirm-modal" class="modal hidden" aria-hidden="true">
     <div class="modal__backdrop" data-close="1"></div>
