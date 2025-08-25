@@ -86,7 +86,8 @@ h2 { margin: 0 0 12px; font-size: 18px; }
 
 input[type="text"],
 input[type="number"],
-select {
+select,
+textarea {
   width: 100%;
   max-width: 100%;
   background: var(--input-bg);
@@ -143,6 +144,9 @@ input[type=number] {
 
 /* Table */
 .table-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.mod-list-controls { display: flex; align-items: center; gap: 8px; }
+#mod-list-modal .mod-list-controls { margin-bottom: 12px; }
+.mod-list-controls label { display: flex; align-items: center; gap: 4px; font-size: 13px; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 thead th { text-align: left; background: var(--table-head-bg); position: sticky; top: 0; }

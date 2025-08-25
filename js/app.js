@@ -93,6 +93,12 @@ const clearAllBtn = document.getElementById('clear-all');
 const themeToggle = document.getElementById('theme-toggle');
 const nameHeader = document.getElementById('name-header');
 const sizeHeader = document.getElementById('size-header');
+const listBtn = document.getElementById('btn-mod-list');
+const includeSizeEl = document.getElementById('include-size');
+const includeIdEl = document.getElementById('include-id');
+const listModal = document.getElementById('mod-list-modal');
+const listTextEl = document.getElementById('mod-list-text');
+const copyListBtn = document.getElementById('copy-mod-list-text');
 
 // =============================
 // Theme (dark/light)
@@ -410,15 +416,47 @@ confirmDeleteBtn.addEventListener('click', () => {
 });
 
 // =============================
+// Mod list export
+// =============================
+function updateModListText(){
+  const mods = [...servers[active].mods].sort((a, b) => a.name.localeCompare(b.name));
+  const includeSize = includeSizeEl?.checked;
+  const includeId = includeIdEl?.checked;
+  const lines = mods.map(m => {
+    let line = m.name;
+    if (includeSize){
+      const sizeText = (m.sizeValue || m.sizeValue === 0) && m.sizeUnit ? `${m.sizeValue} ${m.sizeUnit}` : '';
+      if (sizeText) line += ` - ${sizeText}`;
+    }
+    if (includeId) line += ` - ${m.id}`;
+    return line;
+  });
+  if (listTextEl) listTextEl.value = lines.join('\n');
+}
+
+listBtn?.addEventListener('click', () => {
+  updateModListText();
+  openModal(listModal);
+});
+
+includeSizeEl?.addEventListener('change', updateModListText);
+includeIdEl?.addEventListener('change', updateModListText);
+
+copyListBtn?.addEventListener('click', () => {
+  if (!listTextEl) return;
+  navigator.clipboard.writeText(listTextEl.value).catch(err => console.warn('Copy failed:', err));
+});
+
+// =============================
 // Modal helpers
 // =============================
-[modal, confirmModal, addServerModal, renameServerModal, deleteServerModal].forEach(m => {
+[modal, confirmModal, addServerModal, renameServerModal, deleteServerModal, listModal].forEach(m => {
   m.addEventListener('click', (e) => { if (e.target?.dataset?.close !== undefined) closeModal(m); });
 });
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape'){
-    [modal, confirmModal, addServerModal, renameServerModal, deleteServerModal].forEach(m => {
+    [modal, confirmModal, addServerModal, renameServerModal, deleteServerModal, listModal].forEach(m => {
       if (!m.classList.contains('hidden')) closeModal(m);
     });
   }

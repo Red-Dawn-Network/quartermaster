@@ -59,6 +59,9 @@
     <section class="card">
       <div class="table-head">
         <h2>Mods</h2>
+        <div class="mod-list-controls">
+          <button type="button" class="btn btn-small" id="btn-mod-list">Mod List</button>
+        </div>
       </div>
       <div class="table-wrap">
         <table id="mods-table">
@@ -199,6 +202,28 @@
         <div class="row modal__actions">
           <button type="button" id="confirm-delete-all" class="btn btn-danger">Delete All</button>
           <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mod List Modal -->
+  <div id="mod-list-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="mod-list-title">
+      <header class="modal__header">
+        <h3 id="mod-list-title">Mod List</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <div class="modal__body">
+        <div class="mod-list-controls">
+          <label><input type="checkbox" id="include-size" /> Size</label>
+          <label><input type="checkbox" id="include-id" /> ID</label>
+        </div>
+        <textarea id="mod-list-text" rows="10" readonly></textarea>
+        <div class="row modal__actions">
+          <button type="button" id="copy-mod-list-text" class="btn">Copy</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Close</button>
         </div>
       </div>
     </div>
