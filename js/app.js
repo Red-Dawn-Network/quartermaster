@@ -16,7 +16,12 @@ const palette = [
 const servers = [];         // each: { id, name, color, mods: [{ name, id, sizeValue, sizeUnit }] }
 let active = 0;             // index of the active server
 
-function uid(){ return Math.random().toString(36).slice(2,9); }
+function uid(){
+  return (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2,9);
+}
+
 function makeServer(name){
   const color = palette[servers.length % palette.length];
   return { id: uid(), name, color, mods: [] };
@@ -62,7 +67,7 @@ function loadState(){
 
 function normalizeServer(s){
   return {
-    id: s?.id ?? uid(),
+    id: String(s?.id ?? ''),
     name: String(s?.name ?? 'Server'),
     color: String(s?.color ?? palette[0]),
     mods: Array.isArray(s?.mods) ? s.mods.map(m => ({
@@ -205,6 +210,7 @@ function mountServerBar(){
           <span id="mod-counts" class="server-counts"></span>
           <button class="btn btn-small" id="btn-add-server">Add Server</button>
           <button class="btn btn-small" id="btn-rename-server">Rename</button>
+          <button class="btn btn-small" id="btn-delete-server">Delete</button>
         </div>
       </div>`;
     main.prepend(bar);
@@ -233,6 +239,21 @@ function mountServerBar(){
       const n = prompt('Rename server:', cur.name);
       if (!n) return;
       cur.name = n.trim();
+      refreshServerBar();
+      render();
+      saveState();
+    });
+
+    bar.querySelector('#btn-delete-server').addEventListener('click', ()=>{
+      const cur = servers[active];
+      if (!confirm(`Delete server "${cur.name}"?`)) return;
+      servers.splice(active, 1);
+      if (!servers.length){
+        servers.push(makeServer('Server 1'));
+        active = 0;
+      } else {
+        active = Math.min(active, servers.length - 1);
+      }
       refreshServerBar();
       render();
       saveState();
@@ -334,6 +355,8 @@ form.addEventListener('submit', (e) => {
   const sizeUnit = sizeUnitEl.value;
   if (!name) return alert('Name is required.');
   if (id.length !== 16) return alert('ID must be 16 characters.');
+  if (servers[active].mods.some(m => m.id.toLowerCase() === id.toLowerCase()))
+    return alert('A mod with this ID already exists.');
 
   let sizeValue = null;
   if (sizeValueStr !== ''){
@@ -412,6 +435,8 @@ editForm.addEventListener('submit', (e) => {
   const sizeUnit = editSizeUnitEl.value;
   if (!name) return alert('Name is required.');
   if (id.length !== 16) return alert('ID must be 16 characters.');
+  if (list.some((m, i) => i !== idx && m.id.toLowerCase() === id.toLowerCase()))
+    return alert('A mod with this ID already exists.');
   let sizeValue = null;
   if (sizeValueStr !== ''){
     const parsed = Number(sizeValueStr);
