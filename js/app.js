@@ -86,6 +86,8 @@ const sizeUnitEl = document.getElementById('sizeUnit');
 const tbody = document.getElementById('mods-tbody');
 const clearAllBtn = document.getElementById('clear-all');
 const themeToggle = document.getElementById('theme-toggle');
+const nameHeader = document.getElementById('name-header');
+const sizeHeader = document.getElementById('size-header');
 
 // =============================
 // Theme (dark/light)
@@ -110,6 +112,44 @@ themeToggle?.addEventListener('change', (e) => {
 });
 
 initTheme();
+
+const SORT_KEY = 'rdqm-sort';
+let sortMode = localStorage.getItem(SORT_KEY) || 'name-asc';
+
+function setSortMode(mode){
+  sortMode = mode;
+  try { localStorage.setItem(SORT_KEY, sortMode); } catch (err) { console.warn('Sort save failed:', err); }
+}
+
+function updateSortHeaders(){
+  nameHeader?.classList.remove('asc','desc');
+  sizeHeader?.classList.remove('asc','desc');
+  if (sortMode.startsWith('name')){
+    nameHeader?.classList.add(sortMode.endsWith('asc') ? 'asc' : 'desc');
+  } else if (sortMode.startsWith('size')){
+    sizeHeader?.classList.add(sortMode.endsWith('asc') ? 'asc' : 'desc');
+  }
+}
+
+nameHeader?.addEventListener('click', () => {
+  if (sortMode.startsWith('name')){
+    setSortMode(sortMode === 'name-asc' ? 'name-desc' : 'name-asc');
+  } else {
+    setSortMode('name-asc');
+  }
+  render();
+  saveState();
+});
+
+sizeHeader?.addEventListener('click', () => {
+  if (sortMode.startsWith('size')){
+    setSortMode(sortMode === 'size-asc' ? 'size-desc' : 'size-asc');
+  } else {
+    setSortMode('size-asc');
+  }
+  render();
+  saveState();
+});
 
 // Edit modal elements
 const modal = document.getElementById('edit-modal');
@@ -237,7 +277,21 @@ function refreshServerBar(){
 // Rendering
 // =============================
 function render(){
+  updateSortHeaders();
   const list = servers[active].mods;
+  list.sort((a, b) => {
+    switch (sortMode) {
+      case 'name-desc':
+        return b.name.localeCompare(a.name);
+      case 'size-asc':
+        return modSizeGB(a) - modSizeGB(b);
+      case 'size-desc':
+        return modSizeGB(b) - modSizeGB(a);
+      case 'name-asc':
+      default:
+        return a.name.localeCompare(b.name);
+    }
+  });
   const frag = document.createDocumentFragment();
   list.forEach((m, i) => {
     const tr = document.createElement('tr');
@@ -248,8 +302,8 @@ function render(){
     tr.innerHTML = `
       <td>${i + 1}</td>
       <td>${esc(m.name)}</td>
-      <td>${esc(sizeText)}</td>
       <td>${idCell}</td>
+      <td>${esc(sizeText)}</td>
       <td class="actions">
         <button class="action-btn" data-edit="${i}" aria-label="Edit">Edit</button>
         <button class="action-btn" data-delete="${i}" aria-label="Delete">Delete</button>
