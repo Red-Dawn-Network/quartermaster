@@ -254,21 +254,6 @@ function mountServerBar(){
       openModal(deleteServerModal);
     });
 
-    bar.querySelector('#btn-delete-server').addEventListener('click', ()=>{
-      const cur = servers[active];
-      if (!confirm(`Delete server "${cur.name}"?`)) return;
-      servers.splice(active, 1);
-      if (!servers.length){
-        servers.push(makeServer('Server 1'));
-        active = 0;
-      } else {
-        active = Math.min(active, servers.length - 1);
-      }
-      refreshServerBar();
-      render();
-      saveState();
-    });
-
     bar.querySelector('#server-color').addEventListener('click', ()=>{
       const cur = servers[active];
       const i = (palette.indexOf(cur.color)+1) % palette.length;
