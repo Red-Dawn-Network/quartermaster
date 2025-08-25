@@ -150,6 +150,17 @@ th, td { padding: 10px 12px; border-bottom: 1px solid var(--table-border); }
 tbody tr:hover { background: var(--row-hover-bg); }
 th.actions, td.actions { text-align: right; }
 
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+th.sortable.asc::after {
+  content: ' \25B2';
+}
+th.sortable.desc::after {
+  content: ' \25BC';
+}
+
 .action-btn {
   background: transparent;
   color: var(--ink);
