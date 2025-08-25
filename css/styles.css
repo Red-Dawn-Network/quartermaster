@@ -202,7 +202,6 @@ code { background: var(--input-bg); padding: 1px 4px; border-radius: 4px; border
 .server-chip { display:inline-flex; align-items:center; gap:8px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:var(--input-bg); color: var(--muted); font-size:12px; }
 .server-counts { font-size:13px; color: var(--muted); }
 
-.theme-toggle { position: absolute; top: 16px; right: 20px; }
 .btn-small { padding:6px 10px; font-size:13px; }
 
 /* Dark mode switch */
@@ -213,6 +212,13 @@ code { background: var(--input-bg); padding: 1px 4px; border-radius: 4px; border
   width: 3.5em;
   height: 2em;
 }
+
+.switch.theme-toggle {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+}
+
 
 .switch input {
   opacity: 0;
