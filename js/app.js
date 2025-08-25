@@ -1,5 +1,5 @@
 // Red Dawn Quartermaster — multi-server support + persistence (localStorage)
-// Persists servers[], all mods, and the active server index. No theme code.
+// Persists servers[], all mods, the active server index, and theme preference.
 
 // =============================
 // State
@@ -85,6 +85,32 @@ const sizeUnitEl = document.getElementById('sizeUnit');
 
 const tbody = document.getElementById('mods-tbody');
 const clearAllBtn = document.getElementById('clear-all');
+const themeToggle = document.getElementById('theme-toggle');
+
+// =============================
+// Theme (dark/light)
+// =============================
+const THEME_KEY = 'rdqm-theme';
+
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  if (themeToggle) themeToggle.textContent = t === 'light' ? '🌙' : '☀️';
+}
+
+function initTheme(){
+  const stored = localStorage.getItem(THEME_KEY);
+  const prefers = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  applyTheme(stored || prefers);
+}
+
+themeToggle?.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  const next = current === 'light' ? 'dark' : 'light';
+  applyTheme(next);
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) { console.warn('Theme save failed:', e); }
+});
+
+initTheme();
 
 // Edit modal elements
 const modal = document.getElementById('edit-modal');
