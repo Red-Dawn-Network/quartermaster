@@ -60,6 +60,23 @@ header, footer {
   text-align: center;
 }
 header { position: relative; }
+
+.nav-links {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+}
+
+.nav-links a {
+  color: var(--accent);
+  margin-right: 12px;
+  text-decoration: none;
+}
+
+.nav-links a:hover,
+.nav-links a[aria-current="page"] {
+  text-decoration: underline;
+}
 footer { border-top: 1px solid var(--border); border-bottom: none; }
 
 main { max-width: 960px; margin: 24px auto; padding: 0 16px; }

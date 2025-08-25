@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin</title>
+  <link rel="icon" type="image/x-icon" href="assets/rdn-logo.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+  
+  <script src="config.js"></script>
+</head>
+<body>
+  <header>
+    <nav class="nav-links">
+      <a href="index.html">Viewer</a>
+      <a href="admin.html" aria-current="page">Admin</a>
+    </nav>
+    <label class="switch theme-toggle">
+      <input id="theme-toggle" type="checkbox" aria-label="Toggle theme" />
+      <span class="slider"></span>
+    </label>
+    <h1 id="app-title">Red Dawn Quartermaster</h1>
+    <p>Track and edit a simple list of mods (Name, ID, Size).</p>
+  </header>
+
+  <main>
+    <!-- Add form -->
+    <section class="card">
+      <h2>Add Mod</h2>
+      <form id="mod-form" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <div class="grid">
+          <label>
+            <span>Name</span>
+            <input id="name" name="rdqm_name" type="text" placeholder="Example Mod"
+                   required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          </label>
+          <label>
+            <span>ID</span>
+            <input id="modid" name="rdqm_id" type="text" placeholder="123456"
+                   required minlength="16" maxlength="16" pattern="[A-Za-z0-9]{16}"
+                   autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+          </label>
+          <label>
+            <span>Size</span>
+            <div class="split">
+              <input id="sizeValue" name="rdqm_size_value" type="number" min="0" step="0.01"
+                     inputmode="decimal" placeholder="e.g., 120"
+                     autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+              <select id="sizeUnit" name="rdqm_size_unit">
+                <option value="KB">KB</option>
+                <option value="MB" selected>MB</option>
+                <option value="GB">GB</option>
+              </select>
+            </div>
+          </label>
+        </div>
+        <div class="row">
+          <button type="submit" class="btn">Add</button>
+          <button type="button" id="clear-all" class="btn btn-danger">Clear All</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Table -->
+    <section class="card">
+      <div class="table-head">
+        <h2>Mods</h2>
+        <div class="mod-list-controls">
+          <button type="button" class="btn btn-small" id="btn-mod-list">Mod List</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="mods-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th id="name-header" class="sortable">Name</th>
+              <th>ID</th>
+              <th id="size-header" class="sortable">Size</th>
+              <th class="actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="mods-tbody">
+            <!-- rows injected here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Red Dawn Network — MIT Licensed</p>
+    <p>This project is not associated with or endorsed by Bohemia Interactive.</p>
+  </footer>
+
+  <!-- Edit Modal -->
+  <div id="edit-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="edit-title">
+      <header class="modal__header">
+        <h3 id="edit-title">Edit Mod</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <form id="edit-form" class="modal__body" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <input type="hidden" id="edit-index" />
+        <label>
+          <span>Name</span>
+          <input id="edit-name" name="rdqm_edit_name" type="text" required
+                 autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        </label>
+        <label>
+          <span>ID</span>
+          <input id="edit-id" name="rdqm_edit_id" type="text"
+                 required minlength="16" maxlength="16" pattern="[A-Za-z0-9]{16}"
+                 autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        </label>
+        <label>
+          <span>Size</span>
+          <div class="split">
+            <input id="edit-size-value" name="rdqm_edit_size_value" type="number" min="0" step="0.01"
+                   inputmode="decimal"
+                   autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+            <select id="edit-size-unit" name="rdqm_edit_size_unit">
+              <option value="KB">KB</option>
+              <option value="MB">MB</option>
+              <option value="GB">GB</option>
+            </select>
+          </div>
+        </label>
+        <div class="row">
+          <button type="submit" class="btn">Save</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Server Modal -->
+  <div id="add-server-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="add-server-title">
+      <header class="modal__header">
+        <h3 id="add-server-title">Add Server</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <form id="add-server-form" class="modal__body" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label>
+          <span>Name</span>
+          <input id="add-server-name" type="text" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        </label>
+        <div class="row">
+          <button type="submit" class="btn">Add</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Rename Server Modal -->
+  <div id="rename-server-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="rename-server-title">
+      <header class="modal__header">
+        <h3 id="rename-server-title">Rename Server</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <form id="rename-server-form" class="modal__body" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <label>
+          <span>Name</span>
+          <input id="rename-server-name" type="text" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        </label>
+        <div class="row">
+          <button type="submit" class="btn">Save</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Server Modal -->
+  <div id="delete-server-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="delete-server-title">
+      <header class="modal__header">
+        <h3 id="delete-server-title">Delete server?</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <div class="modal__body">
+        <p class="hint" id="delete-server-hint"></p>
+        <div class="row modal__actions">
+          <button type="button" id="confirm-delete-server" class="btn btn-danger">Delete</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Clear Modal -->
+  <div id="confirm-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <header class="modal__header">
+        <h3 id="confirm-title">Delete all mods?</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <div class="modal__body">
+        <p class="hint">This action cannot be undone.</p>
+        <div class="row modal__actions">
+          <button type="button" id="confirm-delete-all" class="btn btn-danger">Delete All</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mod List Modal -->
+  <div id="mod-list-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="mod-list-title">
+      <header class="modal__header">
+        <h3 id="mod-list-title">Mod List</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <div class="modal__body">
+        <div class="mod-list-controls">
+          <label><input type="checkbox" id="include-size" /> Size</label>
+          <label><input type="checkbox" id="include-id" /> ID</label>
+        </div>
+        <textarea id="mod-list-text" rows="10" readonly></textarea>
+        <div class="row modal__actions">
+          <button type="button" id="copy-mod-list-text" class="btn">Copy</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const t = window.RDQM_CONFIG?.title || "Red Dawn Quartermaster";
+    document.title = t + " Admin";
+    const el = document.getElementById("app-title");
+    if (el) el.textContent = t;
+  })();
+</script>
+<script src="js/app.js"></script>
+</body>
+</html>
