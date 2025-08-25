@@ -94,7 +94,7 @@ const THEME_KEY = 'rdqm-theme';
 
 function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
-  if (themeToggle) themeToggle.textContent = t === 'light' ? '🌙' : '☀️';
+  if (themeToggle) themeToggle.checked = t === 'light';
 }
 
 function initTheme(){
@@ -103,9 +103,8 @@ function initTheme(){
   applyTheme(stored || prefers);
 }
 
-themeToggle?.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-  const next = current === 'light' ? 'dark' : 'light';
+themeToggle?.addEventListener('change', (e) => {
+  const next = e.target.checked ? 'light' : 'dark';
   applyTheme(next);
   try { localStorage.setItem(THEME_KEY, next); } catch (e) { console.warn('Theme save failed:', e); }
 });
