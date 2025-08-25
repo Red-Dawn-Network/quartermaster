@@ -159,6 +159,7 @@ function mountServerBar(){
           <select id="server-select"></select>
         </div>
         <div class="serverbar-right">
+          <span id="mod-counts" class="server-counts"></span>
           <button class="btn btn-small" id="btn-add-server">Add Server</button>
           <button class="btn btn-small" id="btn-rename-server">Rename</button>
         </div>
@@ -250,6 +251,14 @@ function render(){
     frag.appendChild(tr);
   });
   tbody.replaceChildren(frag);
+
+  const countEl = document.getElementById('mod-counts');
+  if (countEl){
+    const currentServer = servers[active];
+    const currentGB = currentServer.mods.reduce((sum, m) => sum + modSizeGB(m), 0);
+    const totalGB = servers.reduce((sSum, s) => sSum + s.mods.reduce((mSum, m) => mSum + modSizeGB(m), 0), 0);
+    countEl.textContent = `${currentServer.name}: ${formatGB(currentGB)} | All servers: ${formatGB(totalGB)}`;
+  }
 
   confirmTitle.textContent = `Delete all mods in "${servers[active].name}"?`;
 }
@@ -370,6 +379,21 @@ function esc(s){
   return (s ?? '').toString().replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"
   }[c]));
+}
+
+function modSizeGB(m){
+  if (m?.sizeValue == null) return 0;
+  const v = m.sizeValue;
+  switch (m.sizeUnit){
+    case 'KB': return v / 1024 / 1024;
+    case 'MB': return v / 1024;
+    case 'GB': return v;
+    default: return 0;
+  }
+}
+
+function formatGB(gb){
+  return `${gb.toFixed(2).replace(/\.00$/, '')} GB`;
 }
 
 // =============================
