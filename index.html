@@ -31,6 +31,7 @@
           <label>
             <span>ID</span>
             <input id="modid" name="rdqm_id" type="text" placeholder="123456"
+                   required minlength="16" maxlength="16" pattern="[A-Za-z0-9]{16}"
                    autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
           </label>
           <label>
@@ -100,6 +101,7 @@
         <label>
           <span>ID</span>
           <input id="edit-id" name="rdqm_edit_id" type="text"
+                 required minlength="16" maxlength="16" pattern="[A-Za-z0-9]{16}"
                  autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
         </label>
         <label>

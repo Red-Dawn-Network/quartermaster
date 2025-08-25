@@ -139,6 +139,10 @@ const confirmDeleteBtn = document.getElementById('confirm-delete-all');
   inp.setAttribute('spellcheck','false');
   inp.name = 'rdqm_' + inp.id; // reduce autofill heuristics
 });
+[idEl, editIdEl].forEach(el => {
+  el.addEventListener('input', () => el.setCustomValidity(''));
+  el.addEventListener('invalid', () => el.setCustomValidity('ID must be 16 characters.'));
+});
 
 // =============================
 // Server Toolbar (injected)
@@ -238,11 +242,14 @@ function render(){
   list.forEach((m, i) => {
     const tr = document.createElement('tr');
     const sizeText = (m.sizeValue || m.sizeValue === 0) && m.sizeUnit ? `${m.sizeValue} ${m.sizeUnit}` : '';
+    const idCell = (m.id && m.id.length === 16)
+      ? `<a href="https://reforger.armaplatform.com/workshop/${encodeURIComponent(m.id)}" target="_blank" rel="noopener">${esc(m.id)}</a>`
+      : esc(m.id || '');
     tr.innerHTML = `
       <td>${i + 1}</td>
       <td>${esc(m.name)}</td>
-      <td>${esc(m.id || '')}</td>
       <td>${esc(sizeText)}</td>
+      <td>${idCell}</td>
       <td class="actions">
         <button class="action-btn" data-edit="${i}" aria-label="Edit">Edit</button>
         <button class="action-btn" data-delete="${i}" aria-label="Delete">Delete</button>
@@ -272,6 +279,7 @@ form.addEventListener('submit', (e) => {
   const sizeValueStr = sizeValueEl.value.trim();
   const sizeUnit = sizeUnitEl.value;
   if (!name) return alert('Name is required.');
+  if (id.length !== 16) return alert('ID must be 16 characters.');
 
   let sizeValue = null;
   if (sizeValueStr !== ''){
@@ -349,6 +357,7 @@ editForm.addEventListener('submit', (e) => {
   const sizeValueStr = editSizeValueEl.value.trim();
   const sizeUnit = editSizeUnitEl.value;
   if (!name) return alert('Name is required.');
+  if (id.length !== 16) return alert('ID must be 16 characters.');
   let sizeValue = null;
   if (sizeValueStr !== ''){
     const parsed = Number(sizeValueStr);

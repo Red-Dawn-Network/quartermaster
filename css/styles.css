@@ -49,6 +49,10 @@ body {
   color: var(--ink);
 }
 
+a, a:visited, a:hover, a:active {
+  color: var(--accent);
+}
+
 header, footer {
   background: var(--header-bg);
   border-bottom: 1px solid var(--border);
