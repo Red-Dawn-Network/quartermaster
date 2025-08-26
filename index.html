@@ -22,6 +22,9 @@
           <span id="server-color" class="server-badge"></span>
           <select id="server-select"></select>
         </div>
+        <div class="serverbar-right">
+          <button type="button" class="btn btn-small" id="btn-mod-list">Mod List</button>
+        </div>
       </div>
     </section>
     <section class="card">
@@ -45,7 +48,27 @@
     <p>&copy; 2025 Red Dawn Network — MIT Licensed</p>
     <p>This project is not associated with or endorsed by Bohemia Interactive.</p>
   </footer>
-    <div id="auth-modal" class="modal hidden" aria-hidden="true">
+  <div id="mod-list-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="mod-list-title">
+      <header class="modal__header">
+        <h3 id="mod-list-title">Mod List</h3>
+        <button class="icon-btn" data-close="1" aria-label="Close">✖</button>
+      </header>
+      <div class="modal__body">
+        <div class="mod-list-controls">
+          <label><input type="checkbox" id="include-size" /> Size</label>
+          <label><input type="checkbox" id="include-id" /> ID</label>
+        </div>
+        <textarea id="mod-list-text" rows="10" readonly></textarea>
+        <div class="row modal__actions">
+          <button type="button" id="copy-mod-list-text" class="btn">Copy</button>
+          <button type="button" class="btn btn-secondary" data-close="1">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="auth-modal" class="modal hidden" aria-hidden="true">
     <div class="modal__backdrop" data-close="1"></div>
     <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="auth-title">
       <header class="modal__header">

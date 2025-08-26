@@ -82,6 +82,12 @@ function openModal(m, onOpen){
   const authForm = document.getElementById('auth-form');
   const authPasswordEl = document.getElementById('auth-password');
   const authErrorEl = document.getElementById('auth-error');
+  const listBtn = document.getElementById('btn-mod-list');
+  const includeSizeEl = document.getElementById('include-size');
+  const includeIdEl = document.getElementById('include-id');
+  const listModal = document.getElementById('mod-list-modal');
+  const listTextEl = document.getElementById('mod-list-text');
+  const copyListBtn = document.getElementById('copy-mod-list-text');
 
   adminLink?.addEventListener('click', (e) => {
     if (localStorage.getItem(AUTH_KEY) === '1') return;
@@ -104,8 +110,42 @@ function openModal(m, onOpen){
   authModal?.addEventListener('click', (e) => {
     if (e.target?.dataset?.close !== undefined) closeModal(authModal);
   });
+   listModal?.addEventListener('click', (e) => {
+    if (e.target?.dataset?.close !== undefined) closeModal(listModal);
+  });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !authModal.classList.contains('hidden')) closeModal(authModal);
+    if (e.key === 'Escape'){
+      if (!authModal.classList.contains('hidden')) closeModal(authModal);
+      if (!listModal.classList.contains('hidden')) closeModal(listModal);
+    }
+  });
+
+  function updateModListText(){
+    const server = state.servers[state.active] || { mods: [] };
+    const mods = [...server.mods].sort((a, b) => a.name.localeCompare(b.name));
+    const includeSize = includeSizeEl?.checked;
+    const includeId = includeIdEl?.checked;
+    const lines = mods.map(m => {
+      let line = m.name;
+      if (includeSize){
+        const sizeText = (m.sizeValue || m.sizeValue === 0) && m.sizeUnit ? `${m.sizeValue} ${m.sizeUnit}` : '';
+        if (sizeText) line += ` - ${sizeText}`;
+      }
+      if (includeId) line += ` - ${m.id}`;
+      return line;
+    });
+    if (listTextEl) listTextEl.value = lines.join('\n');
+  }
+
+  listBtn?.addEventListener('click', () => {
+    updateModListText();
+    openModal(listModal);
+  });
+  includeSizeEl?.addEventListener('change', updateModListText);
+  includeIdEl?.addEventListener('change', updateModListText);
+  copyListBtn?.addEventListener('click', () => {
+    if (!listTextEl) return;
+    navigator.clipboard.writeText(listTextEl.value).catch(err => console.warn('Copy failed:', err));
   });
 
   state = loadState();
