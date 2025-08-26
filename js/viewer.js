@@ -1,7 +1,9 @@
 (function(){
   const STORAGE_KEY = 'rdqm-state-v1';
   const AUTH_KEY = 'rdqm-admin-auth';
+  const SORT_KEY = 'rdqm-sort';
   let state;
+  let sortMode = localStorage.getItem(SORT_KEY) || 'name-asc';
 
   function esc(s){
     return (s ?? '').toString().replace(/[&<>"']/g, c => ({
@@ -11,6 +13,17 @@
   function formatSize(m){
     if (m.sizeValue == null) return '';
     return `${m.sizeValue} ${m.sizeUnit}`;
+  }
+
+  function modSizeGB(m){
+    if (m?.sizeValue == null) return 0;
+    const v = m.sizeValue;
+    switch (m.sizeUnit){
+      case 'KB': return v / 1024 / 1024;
+      case 'MB': return v / 1024;
+      case 'GB': return v;
+      default: return 0;
+    }
   }
 
   function loadState(){
@@ -26,7 +39,7 @@
     }
   }
 
-    function saveState(){
+  function saveState(){
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     catch (e){ console.warn('Failed to save state', e); }
   }
@@ -43,6 +56,21 @@
     }
   }
 
+  function setSortMode(mode){
+    sortMode = mode;
+    try { localStorage.setItem(SORT_KEY, sortMode); } catch (err) { console.warn('Sort save failed:', err); }
+  }
+
+  function updateSortHeaders(){
+    nameHeader?.classList.remove('asc','desc');
+    sizeHeader?.classList.remove('asc','desc');
+    if (sortMode.startsWith('name')){
+      nameHeader?.classList.add(sortMode.endsWith('asc') ? 'asc' : 'desc');
+    } else if (sortMode.startsWith('size')){
+      sizeHeader?.classList.add(sortMode.endsWith('asc') ? 'asc' : 'desc');
+    }
+  }
+
   function render(){
     const title = window.RDQM_CONFIG?.title || 'Mods';
     document.title = title;
@@ -53,7 +81,20 @@
 
     const tbody = document.getElementById('mods-tbody');
     tbody.innerHTML = '';
-    server.mods.forEach((m, i) => {
+    const mods = [...server.mods].sort((a, b) => {
+      switch (sortMode) {
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'size-asc':
+          return modSizeGB(a) - modSizeGB(b);
+        case 'size-desc':
+          return modSizeGB(b) - modSizeGB(a);
+        case 'name-asc':
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
+    mods.forEach((m, i) => {
       const tr = document.createElement('tr');
       const idCell = (m.id && m.id.length === 16)
         ? `<a href="https://reforger.armaplatform.com/workshop/${encodeURIComponent(m.id)}" target="_blank" rel="noopener">${esc(m.id)}</a>`
@@ -61,6 +102,7 @@
       tr.innerHTML = `<td>${i + 1}</td><td>${esc(m.name)}</td><td>${idCell}</td><td>${esc(formatSize(m))}</td>`;
       tbody.appendChild(tr);
     });
+    updateSortHeaders();
   }
 
 function openModal(m, onOpen){
@@ -78,6 +120,8 @@ function openModal(m, onOpen){
   }
 
   const adminLink = document.getElementById('admin-link');
+  const nameHeader = document.getElementById('name-header');
+  const sizeHeader = document.getElementById('size-header');
   const authModal = document.getElementById('auth-modal');
   const authForm = document.getElementById('auth-form');
   const authPasswordEl = document.getElementById('auth-password');
@@ -146,6 +190,24 @@ function openModal(m, onOpen){
   copyListBtn?.addEventListener('click', () => {
     if (!listTextEl) return;
     navigator.clipboard.writeText(listTextEl.value).catch(err => console.warn('Copy failed:', err));
+  });
+
+  nameHeader?.addEventListener('click', () => {
+    if (sortMode.startsWith('name')){
+      setSortMode(sortMode === 'name-asc' ? 'name-desc' : 'name-asc');
+    } else {
+      setSortMode('name-asc');
+    }
+    render();
+  });
+
+  sizeHeader?.addEventListener('click', () => {
+    if (sortMode.startsWith('size')){
+      setSortMode(sortMode === 'size-asc' ? 'size-desc' : 'size-asc');
+    } else {
+      setSortMode('size-asc');
+    }
+    render();
   });
 
   state = loadState();
