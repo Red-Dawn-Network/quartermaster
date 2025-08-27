@@ -6,7 +6,15 @@ Quartermaster is a lightweight, browser‑based tool for organizing Arma Reforge
 
 ## 1. Getting Started
 
-### Serve the Files
+### Deployment with Docker
+
+Deploy the application with Docker like so:
+
+```
+docker run -it -e ADMIN_PASSWORD="somepassword" -e INSTANCE_NAME="Red Dawn Quartermaster" -p 8080:80 ghcr.io/red-dawn-network/quartermaster:latest
+```
+
+#### Manual deployment
 
 Use any static‑file server from the project root:
 
