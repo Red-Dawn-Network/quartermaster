@@ -44,4 +44,4 @@ jobs:
           file: ./docker/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/red-dawn-network/quartermaster:latest,ghcr.io/red-dawn-network/quartermaster:${{ env.GITHUB_SHA }}
+          tags: ghcr.io/red-dawn-network/quartermaster:latest,ghcr.io/red-dawn-network/quartermaster:${{ github.sha }}
